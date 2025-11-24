@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import requests
 
 app = Flask(__name__)
@@ -6,9 +6,13 @@ app = Flask(__name__)
 API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/{}"
 
 
-@app.get("/define/<word>")
-def define(word):
-    word = word.strip()
+@app.get("/")
+def home():
+    return render_template('index.html')
+
+@app.post("/define")
+def define():
+    word = request.form.get("word","").strip()
 
     if " " in word:
         return jsonify({"error": "Only one word allowed"}), 400
@@ -22,12 +26,8 @@ def define(word):
 
     meaning = data[0]["meanings"][0]["definitions"][0]
 
-    return jsonify({
-        "word": data[0]["word"],
-        "part_of_speech": data[0]["meanings"][0]["partOfSpeech"],
-        "definition": meaning.get("definition"),
-        "example": meaning.get("example"),
-    })
+    return render_template('index.html', meaning = meaning)
+    
 
 
 if __name__ == "__main__":
